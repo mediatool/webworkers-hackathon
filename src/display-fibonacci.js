@@ -7,16 +7,24 @@ function parseTargetNumber (e) {
 }
 
 function DisplayFibonacci () {
-  const [ wantedNumber, setNumber ] = useState(0)
+  const [ wantedNumber, setNumber ] = useState(1)
 
   return (
     <div>
-      Fibonacci number { wantedNumber } is { nthFibonacci(wantedNumber) }
-      <input
-        type="number"
-        value={ wantedNumber }
-        onChange={ compose(setNumber, parseTargetNumber) }
-      />
+      <div className="bp3-callout .modifier">
+        <h4 className="bp3-heading">Fibonacci</h4>
+        Type in a number n to find out what the nth fibonacci number is.
+        Somewhere just below 40 it starts to take time to compute.
+        <br />
+        <input
+          type="number"
+          min="1"
+          value={ wantedNumber }
+          onChange={ compose(setNumber, parseTargetNumber) }
+        />
+        <br />
+        Fibonacci number { wantedNumber } is { nthFibonacci(wantedNumber) }
+      </div>
     </div>
   )
 }
