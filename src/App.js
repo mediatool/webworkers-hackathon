@@ -1,25 +1,21 @@
 import React from 'react'
-import logo from './logo.svg'
+import { BrowserRouter, NavLink, Route } from 'react-router-dom'
 import './App.css'
+import DisplayFibonacci from './display-fibonacci'
 
 function App () {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={ logo } className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <div className="App">
+        <nav>
+          <NavLink to="/fibonacci">Fib numbers</NavLink>
+          <NavLink to="/bigdata">Crunch some data</NavLink>
+        </nav>
+        <div className="stage">
+          <Route path="/fibonacci" component={ DisplayFibonacci } />
+        </div>
+      </div>
+    </BrowserRouter>
   )
 }
 
