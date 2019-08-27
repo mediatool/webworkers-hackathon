@@ -1,10 +1,6 @@
 import React, { useState } from 'react'
-import { compose } from 'yafu'
 import nthFibonacci from './nth-fibonacci'
-
-function parseTargetNumber (e) {
-  return Number(e.target.value)
-}
+import parseNumberAnd from './parse-number-and'
 
 function DisplayFibonacci () {
   const [ wantedNumber, setNumber ] = useState(1)
@@ -20,7 +16,7 @@ function DisplayFibonacci () {
           type="number"
           min="1"
           value={ wantedNumber }
-          onChange={ compose(setNumber, parseTargetNumber) }
+          onChange={ parseNumberAnd(setNumber) }
         />
         <br />
         Fibonacci number { wantedNumber } is { nthFibonacci(wantedNumber) }

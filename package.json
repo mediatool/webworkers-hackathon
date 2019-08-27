@@ -4,6 +4,8 @@
   "private": true,
   "dependencies": {
     "@blueprintjs/core": "^3.18.0",
+    "camel-case": "^3.0.0",
+    "ramda": "^0.26.1",
     "react": "next",
     "react-dom": "next",
     "react-router-dom": "^5.0.1",
