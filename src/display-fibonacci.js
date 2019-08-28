@@ -1,24 +1,33 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import parseNumberAnd from './parse-number-and'
 import Loader from './loader'
 import './fibonacci.css'
 
-const fibWorker = new Worker(process.env.PUBLIC_URL + '/nth-fibonacci.js') // eslint-disable-line
+let fibWorker
 
 function DisplayFibonacci () {
   const [ wantedNumber, setNumber ] = useState(1)
   const [ calculatedValue, setCalculatedValue ] = useState(1)
   const [ isLoading, setIsLoading ] = useState(false)
 
-  fibWorker.onmessage = function (e) {
-    setCalculatedValue(e.data)
-    setIsLoading(false)
-  }
+  useEffect(() => {
+    fibWorker = new Worker(`${process.env.PUBLIC_URL}/nth-fibonacci.js`)
+    fibWorker.onmessage = function (e) {
+      setCalculatedValue(e.data)
+      setIsLoading(false)
+    }
+    return () => {
+      fibWorker.terminate()
+    }
+  }, [])
+
+  useEffect(() => {
+    fibWorker.postMessage(wantedNumber)
+  }, [ wantedNumber ])
 
   function handleChange (n) {
     setIsLoading(true)
     setNumber(n)
-    fibWorker.postMessage(n)
   }
 
   return (
@@ -34,7 +43,6 @@ function DisplayFibonacci () {
           min="1"
           value={ wantedNumber }
           onChange={ parseNumberAnd(handleChange) }
-          disabled={ isLoading }
         />
         <br />
         <h4 className="fib-number">Fibonacci number { wantedNumber } is </h4>
