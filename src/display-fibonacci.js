@@ -26,7 +26,7 @@ function DisplayFibonacci () {
   }, [ wantedNumber ])
 
   function handleChange (n) {
-    setIsLoading(true)
+    setIsLoading(n !== wantedNumber)
     setNumber(n)
   }
 
