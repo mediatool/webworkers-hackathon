@@ -1,9 +1,20 @@
 import React, { useState } from 'react'
-import nthFibonacci from './nth-fibonacci'
 import parseNumberAnd from './parse-number-and'
+
+const fibWorker = new Worker(process.env.PUBLIC_URL + '/nth-fibonacci.js')
 
 function DisplayFibonacci () {
   const [ wantedNumber, setNumber ] = useState(1)
+  const [ calculatedValue, setCalculatedValue ] = useState(1)
+
+  fibWorker.onmessage = function (e) {
+    setCalculatedValue(e.data)
+  }
+
+  function handleChange (n) {
+    setNumber(n)
+    fibWorker.postMessage(n)
+  }
 
   return (
     <div>
@@ -16,10 +27,10 @@ function DisplayFibonacci () {
           type="number"
           min="1"
           value={ wantedNumber }
-          onChange={ parseNumberAnd(setNumber) }
+          onChange={ parseNumberAnd(handleChange) }
         />
         <br />
-        Fibonacci number { wantedNumber } is { nthFibonacci(wantedNumber) }
+        Fibonacci number { wantedNumber } is { calculatedValue }
       </div>
     </div>
   )
