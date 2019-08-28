@@ -4,30 +4,58 @@ import { TagInput } from '@blueprintjs/core'
 import camelCase from 'camel-case'
 import parseNumberAnd from './parse-number-and'
 import generateEntries from './generate-entries'
+import splitDataByProportion from './split-data-by-proportion'
+import summarizeEntries from './summarize-entries'
 
 const initialFields = [ 'Price', 'Impressions' ]
 
 
-let summarizeEntriesWorker
+const summarizeEntriesWorkers = []
+const NUMBER_OF_WORKERS = 10
+
+function decrease (a) {
+  return a - 1
+}
+
 function DisplayBigData () {
   const [ wantedNumberEntries, setNumberEntries ] = useState(1000)
   const [ fields, setFields ] = useState(initialFields)
-  const [ sum, setSum ] = useState({})
+  const keys = map(camelCase, fields)
+  const [ sum, setSum ] = useState(summarizeEntries(keys, []))
+  const [ activeWorkers, setActiveWorkers ] = useState(0)
 
   useEffect(() => {
-    summarizeEntriesWorker = new Worker(`${process.env.PUBLIC_URL}/summarize-entries.worker.js`)
-    summarizeEntriesWorker.onmessage = function (e) {
-      setSum(e.data.res)
+    for (let i = 0; i < NUMBER_OF_WORKERS; i += 1) {
+      summarizeEntriesWorkers[i] = new Worker(`${process.env.PUBLIC_URL}/summarize-entries.worker.js`)
+      summarizeEntriesWorkers[i].onmessage = function (e) {
+        setSum((currentSum) => summarizeEntries(keys, [ currentSum, e.data.res ]))
+        setActiveWorkers(decrease)
+      }
     }
+
     return () => {
-      summarizeEntriesWorker.terminate()
+      for (let i = 0; i < NUMBER_OF_WORKERS; i += 1) {
+        summarizeEntriesWorkers[i].terminate()
+      }
     }
   }, [])
 
   useEffect(() => {
-    const keys = map(camelCase, fields)
     const entries = generateEntries(keys, wantedNumberEntries)
-    summarizeEntriesWorker.postMessage({ keys, entries, timeSent: Date.now() })
+    const entriesToBeSent = splitDataByProportion(entries, NUMBER_OF_WORKERS)
+    setSum(summarizeEntries(keys, []))
+    setActiveWorkers((v) => v + NUMBER_OF_WORKERS)
+    setTimeout(() => {
+      for (let i = 0; i < NUMBER_OF_WORKERS; i += 1) {
+        summarizeEntriesWorkers[i].postMessage(
+          {
+            keys,
+            entries: entriesToBeSent[i],
+            timeSent: Date.now(),
+          }
+        )
+      }
+    }, 200)
   }, [ wantedNumberEntries, fields ])
 
   return (
@@ -50,6 +78,9 @@ function DisplayBigData () {
           values={ fields }
         />
       </div>
+      { activeWorkers > 0 && (
+        <div>{ activeWorkers } workers, summarizing your entries for you...</div>
+      ) }
       <div>
         The sum is:
         <ul>

@@ -40,6 +40,5 @@ function summarizeEntries (keys, entries) {
 
 onmessage = function (e) {
   const { keys, entries, timeSent } = e.data
-  console.log(Date.now() - timeSent)
   postMessage({ res: summarizeEntries(keys, entries), timeSent: Date.now() })
 }
